@@ -28,6 +28,10 @@ android {
             includeAndroidResources = true
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 // Ensure the no-op dependency is always used in JVM tests.
@@ -59,8 +63,12 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     implementation 'com.github.cycki:rxcommand:v0.1'
     implementation 'com.jakewharton.timber:timber:4.6.0'
+    implementation 'com.patloew.rxlocation:rxlocation:1.0.4'
+    implementation 'com.tbruyelle.rxpermissions:rxpermissions:0.9.4@aar'
+    implementation 'at.wirecube:additive_animations:1.5.0'
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"

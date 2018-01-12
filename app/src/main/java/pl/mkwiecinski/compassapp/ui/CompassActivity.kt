@@ -9,6 +9,7 @@ import io.reactivex.disposables.CompositeDisposable
 import pl.mkwiecinski.compassapp.R
 import pl.mkwiecinski.compassapp.databinding.ActivityCompassBinding
 import pl.mkwiecinski.compassapp.di.factories.CompassViewModelFactory
+import pl.mkwiecinski.compassapp.providers.AzimuthProvider
 import pl.mkwiecinski.compassapp.vm.CompassViewModel
 import javax.inject.Inject
 
@@ -18,11 +19,16 @@ class CompassActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCompassBinding
     private lateinit var viewModel: CompassViewModel
     @Inject lateinit var factory: CompassViewModelFactory
+    @Inject lateinit var azimuthProvider: AzimuthProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         initViewModel(savedInstanceState)
+        lifecycle.apply {
+            addObserver(azimuthProvider)
+            addObserver(viewModel)
+        }
         initView(savedInstanceState)
     }
 
