@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     >
 
@@ -9,17 +10,63 @@
         <variable
             name="azimuth"
             type="Float"/>
+
+        <variable
+            name="target"
+            type="Float"/>
     </data>
 
-    <RelativeLayout
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/compass"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_compass"
-            tools:src="@color/colorAccent"/>
-    </RelativeLayout>
+            android:id="@+id/imgBackground"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_compass_background"
+            tools:ignore="ContentDescription"/>
+
+        <ImageView
+            android:id="@+id/imgNeedle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/ic_needle"
+            app:layout_constraintBottom_toBottomOf="@+id/imgBackground"
+            app:layout_constraintEnd_toEndOf="@+id/imgBackground"
+            app:layout_constraintStart_toStartOf="@+id/imgBackground"
+            app:layout_constraintTop_toTopOf="@+id/imgBackground"
+            app:rotationAnimated="@{azimuth}"
+            app:srcCompat="@drawable/ic_needle"
+            tools:ignore="ContentDescription"/>
+
+        <FrameLayout
+            android:id="@+id/imgTargetContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:visibility="@{target != null}"
+            app:layout_constraintBottom_toBottomOf="@+id/imgBackground"
+            app:layout_constraintEnd_toEndOf="@+id/imgBackground"
+            app:layout_constraintStart_toStartOf="@+id/imgBackground"
+            app:layout_constraintTop_toTopOf="@+id/imgBackground"
+            app:rotationAnimated="@{target}">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:tint="@color/colorAccent"
+                app:srcCompat="@drawable/ic_navigation"/>
+        </FrameLayout>
+
+    </android.support.constraint.ConstraintLayout>
 </layout>

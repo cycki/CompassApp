@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.RelativeLayout
-import at.wirecube.additiveanimations.additive_animator.AdditiveAnimator
 import pl.mkwiecinski.compassapp.databinding.WidgetCompassBinding
 
 
@@ -15,17 +14,16 @@ class CompassView @JvmOverloads constructor(context: Context,
                                                                                     defStyleAttr) {
     private val binding = WidgetCompassBinding.inflate(LayoutInflater.from(context), this, true)
 
-    private val animator = AdditiveAnimator.animate(binding.compass)
-    var azimuth: Float? = null
-        get() = field
+    var azimuth: Float?
+        get() = binding.azimuth
         set(value) {
-            field = value
-            value?.let {
-                animator.rotation(it).start()
-            }
+            binding.azimuth = value
         }
 
-    init {
+    var target: Float?
+        get() = binding.target
+        set(value) {
+            binding.target = value
+        }
 
-    }
 }

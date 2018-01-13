@@ -28,23 +28,39 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
         </android.support.design.widget.AppBarLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center_vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
             <pl.mkwiecinski.compassapp.ui.widgets.CompassView
                 android:id="@+id/compass"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:layout_centerInParent="true"
-                app:azimuth="@{model.azimuth}"/>
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                app:azimuth="@{model.azimuth}"
+                app:target="@{model.targetRelativeAngle}"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{String.valueOf(safeUnbox(model.azimuth))}"
-                tools:text="22"/>
-        </RelativeLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:onClick="@{model.pickTargetCommand}"
+            android:src="@drawable/ic_navigation"
+            app:fabSize="normal"/>
     </android.support.design.widget.CoordinatorLayout>
 </layout>

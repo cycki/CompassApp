@@ -1,66 +1,100 @@
 package pl.mkwiecinski.compassapp.vm
 
+import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.OnLifecycleEvent
-import android.arch.lifecycle.ViewModel
 import android.databinding.ObservableField
+import android.location.Location
 import com.google.android.gms.location.LocationRequest
 import com.patloew.rxlocation.RxLocation
-import com.tbruyelle.rxpermissions.RxPermissions
-import dagger.Lazy
-import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import pl.mkwiecinski.compassapp.BuildConfig
+import pl.mkwiecinski.compassapp.models.TargetModel
 import pl.mkwiecinski.compassapp.providers.AzimuthProvider
+import pl.mkwiecinski.compassapp.shared.BaseViewModel
 import pl.mkwiecinski.compassapp.shared.addDisposable
+import pl.mkwiecinski.compassapp.shared.plusAssign
 import pl.mkwiecinski.compassapp.shared.value
+import pl.mkwiecinski.rxcommand.RxCommand
 import javax.inject.Inject
 
 
 class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthProvider,
-                                           private val locationProvider: RxLocation,
-                                           private val permissions: Lazy<RxPermissions>) : ViewModel(),
+                                           private val locationProvider: RxLocation) : BaseViewModel(),
         LifecycleObserver {
-    private val disposeBag = CompositeDisposable()
-    private val stoppableUpdates = CompositeDisposable()
 
-    val azimuth = ObservableField<Float?>()
+    val azimuth = ObservableField<Float>()
+
+    val target = ObservableField<TargetModel>()
+    private val targetBearing = ObservableField<Float>()
+    val targetRelativeAngle = ObservableField<Float>()
+
+    val pickTargetCommand = RxCommand(this::pickTarget)
+    val startNavigationCommand = RxCommand(this::startNavigationTo)
+
+    init {
+        azimuth += this::updateTargetAngle
+        targetBearing += this::updateTargetAngle
+    }
+
+    private fun updateTargetAngle(param: Float?) {
+        targetRelativeAngle.value = targetBearing.value?.plus(azimuth.value ?: 0f)
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START) fun requestUpdates() {
         azimuthProvider.radiansValue.subscribeOn(Schedulers.io()).map { radiansToUsableDegrees(it) }.retry().subscribe {
             azimuth.value = it
-        }.addDisposable(stoppableUpdates)
-
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 5000
-        }
-
-//        locationProvider.location().updates(locationRequest).map {
-//            it.bearing
-//        }
-    }
-
-    private fun radiansToUsableDegrees(it: Float): Float {
-        return Math.toDegrees(-it.toDouble()).toFloat().let {
-            if (it < 0) {
-                it + 360
-            } else {
-                it
-            }
-        }
+        }.addDisposable(disposeBag)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP) fun stopUpdates() {
-        stoppableUpdates.clear()
+        disposeBag.clear()
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        disposeBag.dispose()
-    }
-}
+    @SuppressLint("MissingPermission") private fun requestLocationUpdates() {
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 5000
+            fastestInterval = 200
+        }
 
-private fun Float.toDegrees(): Float {
-    return Math.toDegrees(toDouble()).toFloat()
+        locationProvider.location().updates(locationRequest).map {
+            val current = target.value?.let {
+                Location(BuildConfig.APPLICATION_ID).apply {
+                    latitude = it.latitude
+                    longitude = it.longitude
+                    bearing = azimuth.value ?: 0f
+                }
+            }
+            it.bearingTo(current)
+        }.subscribe {
+            targetBearing.value = it
+        }.addDisposable(disposeBag)
+
+    }
+
+    private fun startNavigationTo(param: TargetModel): Single<Unit> {
+        return Single.just(param).doOnSuccess {
+            target.value = it
+        }.doOnSuccess {
+            requestLocationUpdates()
+        }.map {}
+    }
+
+    private fun pickTarget(param: Unit) = Single.just(Unit)
+
+    private fun radiansToUsableDegrees(it: Float): Float {
+        return Math.toDegrees(-it.toDouble()).toFloat().let {
+            var result = it
+            while (result < 0.0f) {
+                result += 360.0f
+            }
+            while (result >= 360.0f) {
+                result -= 360.0f
+            }
+            result
+        }
+    }
 }
