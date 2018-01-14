@@ -131,13 +131,13 @@ private const val STATE_KEY = ".state"
 private infix fun CompassViewModel.saveTo(outState: Bundle?): Bundle {
     return (outState ?: Bundle()).apply {
         putString(STATE_KEY,
-                  CompassState(azimuth.value, target.value, targetBearing.value).toJson())
+                  CompassState(northRotation.value, target.value, targetBearing.value).toJson())
     }
 }
 
 private infix fun CompassViewModel.restoreFrom(savedInstanceState: Bundle?) {
     savedInstanceState?.getString(STATE_KEY)?.fromJson<CompassState>()?.let {
-        azimuth.value = it.azimuth
+        northRotation.value = it.azimuth
         target.value = it.target
         targetBearing.value = it.targetBearing
     }

@@ -26,7 +26,7 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
                                            private val locationProvider: RxLocation) : BaseViewModel(),
         LifecycleObserver {
 
-    val azimuth = ObservableField<Float>()
+    val northRotation = ObservableField<Float>()
 
     val target = ObservableField<TargetModel>()
     internal val targetBearing = ObservableField<Float>()
@@ -37,7 +37,7 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
     val startNavigationCommand = RxCommand(this::startNavigationTo)
 
     init {
-        azimuth += this::updateTargetAngle
+        northRotation += this::updateTargetAngle
         targetBearing += this::updateTargetAngle
         target += {
             isWaitingForLocationUpdate.value = it != null
@@ -45,12 +45,12 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
     }
 
     private fun updateTargetAngle(param: Float?) {
-        targetRelativeAngle.value = targetBearing.value?.plus(azimuth.value ?: 0f)
+        targetRelativeAngle.value = targetBearing.value?.plus(northRotation.value ?: 0f)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START) fun requestUpdates() {
         azimuthProvider.radiansValue.subscribeOn(Schedulers.io()).map { radiansToUsableDegrees(it) }.retry().subscribe {
-            azimuth.value = it
+            northRotation.value = it
         }.addDisposable(disposeBag)
     }
 
@@ -72,7 +72,7 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
                 Location(BuildConfig.APPLICATION_ID).apply {
                     latitude = it.latitude
                     longitude = it.longitude
-                    bearing = azimuth.value ?: 0f
+                    bearing = northRotation.value ?: 0f
                 }
             }
             it.bearingTo(current)

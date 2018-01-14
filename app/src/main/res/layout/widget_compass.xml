@@ -8,7 +8,7 @@
     <data>
 
         <variable
-            name="azimuth"
+            name="northRotation"
             type="Float"/>
 
         <variable
@@ -41,7 +41,7 @@
             app:layout_constraintEnd_toEndOf="@+id/imgBackground"
             app:layout_constraintStart_toStartOf="@+id/imgBackground"
             app:layout_constraintTop_toTopOf="@+id/imgBackground"
-            app:rotationAnimated="@{azimuth}"
+            app:rotationAnimated="@{northRotation}"
             app:srcCompat="@drawable/ic_needle"
             tools:ignore="ContentDescription"/>
 
