@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.CompassActivity">
+            android:name=".ui.CompassActivity"
+            android:screenOrientation="userPortrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

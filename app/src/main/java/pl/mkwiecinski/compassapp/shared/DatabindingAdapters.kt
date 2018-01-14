@@ -4,10 +4,13 @@ import android.databinding.BindingAdapter
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.TextView
 import at.wirecube.additiveanimations.additive_animator.AdditiveAnimator
+import com.wang.avi.AVLoadingIndicatorView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import pl.mkwiecinski.rxcommand.CommandState
 import pl.mkwiecinski.rxcommand.RxCommand
+import java.text.NumberFormat
 
 @BindingAdapter("android:onClick") fun <T> bindOnClick(view: Button, command: RxCommand<Unit, T>?) {
     view.setOnClickListener {
@@ -44,5 +47,22 @@ import pl.mkwiecinski.rxcommand.RxCommand
 @BindingAdapter("rotationAnimated") fun animateRotation(view: View, value: Float?) {
     value?.let {
         AdditiveAnimator.animate(view).rotation(it).start()
+    }
+}
+
+
+@BindingAdapter("coordinate") fun bindCoordinate(view: TextView, longitude: Double?) {
+    view.text = longitude?.let {
+        NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = 10
+        }.format(it)
+    }
+}
+
+@BindingAdapter("android:visibility") fun bindVisibility(view: AVLoadingIndicatorView,
+                                                         isVisible: Boolean?) {
+    when (isVisible) {
+        true -> view.smoothToShow()
+        else -> view.smoothToHide()
     }
 }

@@ -18,14 +18,15 @@ import pl.mkwiecinski.compassapp.di.factories.CompassViewModelFactory
 import pl.mkwiecinski.compassapp.models.TargetModel
 import pl.mkwiecinski.compassapp.nav.ICompassNavigator
 import pl.mkwiecinski.compassapp.providers.AzimuthProvider
-import pl.mkwiecinski.compassapp.shared.addDisposable
-import pl.mkwiecinski.compassapp.shared.execute
-import pl.mkwiecinski.compassapp.shared.value
+import pl.mkwiecinski.compassapp.shared.*
 import pl.mkwiecinski.compassapp.ui.dialogs.TargetPickerCallback
 import pl.mkwiecinski.compassapp.vm.CompassViewModel
 import javax.inject.Inject
 
 class CompassActivity : AppCompatActivity(), TargetPickerCallback, HasSupportFragmentInjector {
+    companion object {
+        private const val LOCATION = Manifest.permission.ACCESS_FINE_LOCATION
+    }
 
     private val disposeBag = CompositeDisposable()
 
@@ -37,6 +38,7 @@ class CompassActivity : AppCompatActivity(), TargetPickerCallback, HasSupportFra
     @Inject lateinit var azimuthProvider: AzimuthProvider
     @Inject lateinit var navigator: ICompassNavigator
     @Inject lateinit var fragmentInjector: DispatchingAndroidInjector<Fragment>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -52,7 +54,7 @@ class CompassActivity : AppCompatActivity(), TargetPickerCallback, HasSupportFra
     private fun initViewModel(savedInstanceState: Bundle?) {
         viewModel = ViewModelProviders.of(this, factory)[CompassViewModel::class.java]
         viewModel.changeTargetCommand.success.flatMap {
-            rxPermissions.requestEachCombined(Manifest.permission.ACCESS_FINE_LOCATION)
+            rxPermissions.requestEachCombined(LOCATION)
         }.subscribe {
             when {
                 it.granted -> navigator.navigatePickTarget(viewModel.target.value)
@@ -96,8 +98,47 @@ class CompassActivity : AppCompatActivity(), TargetPickerCallback, HasSupportFra
     override fun supportFragmentInjector() = fragmentInjector
 
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        val state = viewModel saveTo outState
+        super.onSaveInstanceState(state)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        viewModel restoreFrom savedInstanceState
+        if (viewModel.target.value != null && !rxPermissions.isGranted(LOCATION)) {
+            viewModel.targetBearing.value = null
+            Snackbar.make(binding.root,
+                          R.string.missing_location_permission_disabled,
+                          Snackbar.LENGTH_LONG).apply {
+                setAction(R.string.target_retry) {
+                    viewModel.changeTargetCommand.execute()
+                }
+            }.show()
+        }
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
     override fun onDestroy() {
         disposeBag.dispose()
         super.onDestroy()
+    }
+}
+
+private class CompassState(val azimuth: Float?, val target: TargetModel?, val targetBearing: Float?)
+
+private const val STATE_KEY = ".state"
+
+private infix fun CompassViewModel.saveTo(outState: Bundle?): Bundle {
+    return (outState ?: Bundle()).apply {
+        putString(STATE_KEY,
+                  CompassState(azimuth.value, target.value, targetBearing.value).toJson())
+    }
+}
+
+private infix fun CompassViewModel.restoreFrom(savedInstanceState: Bundle?) {
+    savedInstanceState?.getString(STATE_KEY)?.fromJson<CompassState>()?.let {
+        azimuth.value = it.azimuth
+        target.value = it.target
+        targetBearing.value = it.targetBearing
     }
 }

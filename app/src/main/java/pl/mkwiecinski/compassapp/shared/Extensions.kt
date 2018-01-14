@@ -40,6 +40,14 @@ operator inline fun ObservableFloat.plusAssign(crossinline action: (Float) -> Un
     })
 }
 
+operator inline fun ObservableBoolean.plusAssign(crossinline action: (Boolean) -> Unit) {
+    addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback() {
+        override fun onPropertyChanged(sender: Observable?, propertyId: Int) {
+            action(get())
+        }
+    })
+}
+
 operator inline fun <T> ObservableField<T>.plusAssign(crossinline action: (T?) -> Unit) {
     addOnPropertyChangedCallback(object : Observable.OnPropertyChangedCallback() {
         override fun onPropertyChanged(sender: Observable?, propertyId: Int) {

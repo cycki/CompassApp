@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleObserver
 import android.arch.lifecycle.OnLifecycleEvent
+import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.location.Location
 import com.google.android.gms.location.LocationRequest
@@ -13,10 +14,10 @@ import io.reactivex.schedulers.Schedulers
 import pl.mkwiecinski.compassapp.BuildConfig
 import pl.mkwiecinski.compassapp.models.TargetModel
 import pl.mkwiecinski.compassapp.providers.AzimuthProvider
-import pl.mkwiecinski.compassapp.shared.vm.BaseViewModel
 import pl.mkwiecinski.compassapp.shared.addDisposable
 import pl.mkwiecinski.compassapp.shared.plusAssign
 import pl.mkwiecinski.compassapp.shared.value
+import pl.mkwiecinski.compassapp.shared.vm.BaseViewModel
 import pl.mkwiecinski.rxcommand.RxCommand
 import javax.inject.Inject
 
@@ -28,8 +29,9 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
     val azimuth = ObservableField<Float>()
 
     val target = ObservableField<TargetModel>()
-    private val targetBearing = ObservableField<Float>()
+    internal val targetBearing = ObservableField<Float>()
     val targetRelativeAngle = ObservableField<Float>()
+    val isWaitingForLocationUpdate = ObservableBoolean(false)
 
     val changeTargetCommand = RxCommand(this::changeTarget)
     val startNavigationCommand = RxCommand(this::startNavigationTo)
@@ -37,6 +39,9 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
     init {
         azimuth += this::updateTargetAngle
         targetBearing += this::updateTargetAngle
+        target += {
+            isWaitingForLocationUpdate.value = it != null
+        }
     }
 
     private fun updateTargetAngle(param: Float?) {
@@ -60,7 +65,9 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
             fastestInterval = 200
         }
 
-        locationProvider.location().updates(locationRequest).map {
+        locationProvider.location().updates(locationRequest).doOnNext {
+            isWaitingForLocationUpdate.value = false
+        }.map {
             val current = target.value?.let {
                 Location(BuildConfig.APPLICATION_ID).apply {
                     latitude = it.latitude
