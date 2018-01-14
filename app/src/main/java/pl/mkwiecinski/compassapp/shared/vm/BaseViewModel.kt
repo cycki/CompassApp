@@ -1,4 +1,4 @@
-package pl.mkwiecinski.compassapp.shared
+package pl.mkwiecinski.compassapp.shared.vm
 
 import android.arch.lifecycle.ViewModel
 import io.reactivex.disposables.CompositeDisposable

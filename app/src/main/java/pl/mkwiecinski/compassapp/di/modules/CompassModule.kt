@@ -6,15 +6,18 @@ import com.tbruyelle.rxpermissions2.RxPermissions
 import dagger.Module
 import dagger.Provides
 import pl.mkwiecinski.compassapp.di.ActivityScope
+import pl.mkwiecinski.compassapp.nav.CompassNavigator
+import pl.mkwiecinski.compassapp.nav.ICompassNavigator
 import pl.mkwiecinski.compassapp.providers.AzimuthProvider
 import pl.mkwiecinski.compassapp.ui.CompassActivity
 
 @Module class CompassModule {
-    @ActivityScope @Provides fun azimuthProvider(context: Context): AzimuthProvider {
-        return AzimuthProvider(context)
-    }
+    @ActivityScope @Provides fun azimuthProvider(context: Context): AzimuthProvider = AzimuthProvider(
+            context)
 
     @Provides fun provideLocation(context: Context): RxLocation = RxLocation(context)
     @Provides fun providePermissions(activity: CompassActivity): RxPermissions = RxPermissions(
             activity)
+
+    @Provides fun provideNavigator(navigator: CompassNavigator): ICompassNavigator = navigator
 }

@@ -13,7 +13,7 @@ import io.reactivex.schedulers.Schedulers
 import pl.mkwiecinski.compassapp.BuildConfig
 import pl.mkwiecinski.compassapp.models.TargetModel
 import pl.mkwiecinski.compassapp.providers.AzimuthProvider
-import pl.mkwiecinski.compassapp.shared.BaseViewModel
+import pl.mkwiecinski.compassapp.shared.vm.BaseViewModel
 import pl.mkwiecinski.compassapp.shared.addDisposable
 import pl.mkwiecinski.compassapp.shared.plusAssign
 import pl.mkwiecinski.compassapp.shared.value
@@ -31,7 +31,7 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
     private val targetBearing = ObservableField<Float>()
     val targetRelativeAngle = ObservableField<Float>()
 
-    val pickTargetCommand = RxCommand(this::pickTarget)
+    val changeTargetCommand = RxCommand(this::changeTarget)
     val startNavigationCommand = RxCommand(this::startNavigationTo)
 
     init {
@@ -83,7 +83,7 @@ class CompassViewModel @Inject constructor(private val azimuthProvider: AzimuthP
         }.map {}
     }
 
-    private fun pickTarget(param: Unit) = Single.just(Unit)
+    private fun changeTarget(param: Unit) = Single.just(Unit)
 
     private fun radiansToUsableDegrees(it: Float): Float {
         return Math.toDegrees(-it.toDouble()).toFloat().let {

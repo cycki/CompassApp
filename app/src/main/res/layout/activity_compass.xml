@@ -34,16 +34,16 @@
             android:gravity="center_vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
 
-            <pl.mkwiecinski.compassapp.ui.widgets.CompassView
+            <include
                 android:id="@+id/compass"
+                layout="@layout/widget_compass"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="4"
                 app:azimuth="@{model.azimuth}"
                 app:target="@{model.targetRelativeAngle}"/>
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            android:onClick="@{model.pickTargetCommand}"
+            android:onClick="@{model.changeTargetCommand}"
             android:src="@drawable/ic_navigation"
             app:fabSize="normal"/>
     </android.support.design.widget.CoordinatorLayout>

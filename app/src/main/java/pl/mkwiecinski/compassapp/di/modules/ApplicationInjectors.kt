@@ -10,5 +10,5 @@ import pl.mkwiecinski.compassapp.ui.CompassActivity
 
 @Module abstract class ApplicationInjectors {
     @Binds abstract fun context(app: CompassApplication): Context
-    @ActivityScope @ContributesAndroidInjector(modules = [CompassModule::class]) abstract fun main(): CompassActivity
+    @ActivityScope @ContributesAndroidInjector(modules = [CompassModule::class, CompassInjectors::class]) abstract fun main(): CompassActivity
 }

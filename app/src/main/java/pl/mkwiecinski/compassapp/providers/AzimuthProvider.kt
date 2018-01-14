@@ -11,7 +11,6 @@ import android.hardware.SensorManager
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
-import timber.log.Timber
 
 
 class AzimuthProvider(context: Context) : LifecycleObserver, SensorEventListener {
@@ -76,7 +75,6 @@ class AzimuthProvider(context: Context) : LifecycleObserver, SensorEventListener
         geomagnetic ?: return
         if (SensorManager.getRotationMatrix(rotationMatrix, null, gravity, geomagnetic)) {
             SensorManager.getOrientation(rotationMatrix, rotationMatrixResult)
-            Timber.d("%.2f %.2f %.2f", rotationMatrixResult[0], rotationMatrixResult[1], rotationMatrixResult[2])
             azimuthSubject.onNext(rotationMatrixResult.first())
         }
     }
